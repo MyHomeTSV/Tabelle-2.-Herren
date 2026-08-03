@@ -68,43 +68,40 @@
   </div>
 
 <script>
-    if ("scrollRestoration" in history) {
-      history.scrollRestoration = "manual";
-    }
+  if ("scrollRestoration" in history) {
+    history.scrollRestoration = "manual";
+  }
+  function forceTop() {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }
+  window.addEventListener("scroll", forceTop, true);
+  forceTop();
 
-    function forceTop() {
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    }
+  (function () {
+    var initialDelay = 3000; // Wartezeit bis zum ERSTEN Scrollen (ms) → 3 Sekunden
+    var step = 250;          // Pixel pro Schritt
+    var stepPause = 4000;    // Wartezeit zwischen den weiteren Schritten (ms)
+    var topPause = 8000;     // Wartezeit oben, bevor der Zyklus neu startet (ms)
+    var current = 0;
 
-    // Reagiert SOFORT auf jeden Scroll-Versuch, dauerhaft (nicht nur am Anfang)
-    window.addEventListener("scroll", forceTop, true);
+    function tick() {
+      var shifter = document.getElementById("shifter");
+      var maxCrop = shifter.scrollHeight - window.innerHeight;
+      if (maxCrop < 0) { maxCrop = 0; }
 
-    forceTop();
-
-    (function () {
-      var step = 250;
-      var stepPause = 4000;
-      var topPause = 8000;
-      var current = 0;
-
-      function tick() {
-        var shifter = document.getElementById("shifter");
-        var maxCrop = shifter.scrollHeight - window.innerHeight;
-        if (maxCrop < 0) { maxCrop = 0; }
-
-        current += step;
-        if (current >= maxCrop) {
-          current = 0;
-        }
-
-        document.documentElement.style.setProperty("--crop-top", current + "px");
-        setTimeout(tick, current === 0 ? topPause : stepPause);
+      current += step;
+      if (current >= maxCrop) {
+        current = 0;
       }
 
-      setTimeout(tick, stepPause);
-    })();
-  </script>
+      document.documentElement.style.setProperty("--crop-top", current + "px");
+      setTimeout(tick, current === 0 ? topPause : stepPause);
+    }
+
+    setTimeout(tick, initialDelay);
+  })();
+</script>
 </body>
 </html>
