@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>TSV Großenkneten - Tabelle</title>
+  <script
+    type="text/javascript"
+    src="https://www.fussball.de/widgets.js">
+  </script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      width: 100%;
+      height: 100%;
+    }
+    #container {
+      width: 100vw;
+      height: 100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      box-sizing: border-box;
+      padding: 20px;
+    }
+    .fussballde_widget {
+      width: 100% !important;
+    }
+
+    /* Wird per JavaScript auf die Zeile des TSV Grossenkneten gesetzt */
+    .tsv-highlight-row {
+      background-color: #ffe066 !important;
+      outline: 3px solid #d40000 !important;
+      outline-offset: -3px;
+      font-weight: bold !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div
+      class="fussballde_widget"
+      data-id="35cadcca-1b8a-420c-ab73-1cd44c8b7cc6"
+      data-type="table"
+      style="width: 100%"
+    ></div>
+  </div>
+
+  <script>
+    var TEAM_NAMES = ['grossenkneten', 'großenkneten'];
+
+    // Durchsucht auch verschachtelte Shadow-DOM-Bereiche nach Text-Elementen.
+    function findAllDeep(root, matches) {
+      matches = matches || [];
+      var all = root.querySelectorAll('*');
+      all.forEach(function (el) {
+        matches.push(el);
+        if (el.shadowRoot) {
+          findAllDeep(el.shadowRoot, matches);
+        }
+      });
+      return matches;
+    }
+
+    function elementOwnText(el) {
+      var text = '';
+      el.childNodes.forEach(function (node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          text += node.textContent;
+        }
+      });
+      return text.trim().toLowerCase();
+    }
+
+    function highlightTeamRows(widgetEl) {
+      var all = findAllDeep(widgetEl);
+      var widgetWidth = widgetEl.offsetWidth || window.innerWidth;
+      var highlightedAny = false;
+
+      all.forEach(function (el) {
+        var ownText = elementOwnText(el);
+        var matches = TEAM_NAMES.some(function (name) {
+          return ownText.indexOf(name) !== -1;
+        });
+        if (!matches) return;
+
+        // Von dem Text-Element aus nach oben laufen, bis wir eine
+        // komplette Tabellenzeile gefunden haben (fast volle Breite).
+        var el2 = el;
+        for (var i = 0; i < 8 && el2.parentElement; i++) {
+          el2 = el2.parentElement;
+          if (el2.offsetWidth >= widgetWidth * 0.7) {
+            el2.classList.add('tsv-highlight-row');
+            highlightedAny = true;
+            break;
+          }
+        }
+      });
+
+      return highlightedAny;
+    }
+
+    var widgetEl = document.querySelector('.fussballde_widget');
+
+    // Erstversuche, bis die Tabelle geladen ist.
+    var attempts = 0;
+    var initialTimer = setInterval(function () {
+      attempts++;
+      var done = highlightTeamRows(widgetEl);
+      if (done || attempts > 150) {
+        clearInterval(initialTimer);
+      }
+    }, 200);
+
+    // Danach regelmäßig erneut prüfen, falls sich die Tabelle
+    // aktualisiert (z. B. nach einem Spieltag) und die Markierung
+    // dabei verloren geht.
+    setInterval(function () {
+      highlightTeamRows(widgetEl);
+    }, 10000);
+  </script>
+</body>
+</html>
