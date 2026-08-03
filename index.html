@@ -48,14 +48,21 @@
     </div>
   </div>
 
-  <script>
+<script>
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+    window.scrollTo(0, 0);
+
     (function () {
-      var step = 250;       // Pixel pro Schritt
-      var stepPause = 4000; // Wartezeit zwischen Schritten (ms)
-      var topPause = 8000;  // Wartezeit oben, bevor der Zyklus neu startet (ms)
+      var step = 250;
+      var stepPause = 4000;
+      var topPause = 8000;
       var current = 0;
 
       function tick() {
+        window.scrollTo(0, 0);
+
         var shifter = document.getElementById("shifter");
         var maxCrop = shifter.scrollHeight - window.innerHeight;
         if (maxCrop < 0) { maxCrop = 0; }
