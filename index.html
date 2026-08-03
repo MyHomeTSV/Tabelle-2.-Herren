@@ -14,8 +14,6 @@
       background: #ffffff;
       width: 100%;
       height: 100%;
-      opacity: 0;
-      transition: opacity 0.4s ease-in;
     }
 
     /*
@@ -26,17 +24,19 @@
       --crop-right  = Pixel, die rechts abgeschnitten werden
     */
     :root {
-      --crop-top: 0px;
+      --crop-top: 260px;
+      --crop-height: 1700px;
       --crop-left: 0px;
       --crop-right: 0px;
-      --zoom: 1.3;
-    }
+      --zoom: 1.3; /* 1.0 = normale Größe, 1.3 = 30% größer, 1.5 = 50% größer usw. */
+
     #viewport {
       width: 100vw;
-      height: 100vh;      /* nutzt automatisch die tatsächliche Fenstergröße im Layout */
+      height: var(--crop-height);
       overflow: hidden;
       position: relative;
     }
+
     #shifter {
       position: absolute;
       top: calc(-1 * var(--crop-top));
@@ -54,17 +54,56 @@
   <div id="viewport">
     <div id="shifter">
       <div
-        class="fussballde_widget"
-        data-id="dee66d0f-2c2b-4b49-bcff-a5689520e7c6"
-        data-type="table"
+      class="fussballde_widget"
+      data-id="35cadcca-1b8a-420c-ab73-1cd44c8b7cc6"
+      data-type="table"
         style="width: 100%"
       ></div>
     </div>
   </div>
-  <script>
-    setTimeout(function () {
-      document.body.style.opacity = "1";
-    }, 2500);
+</body>
+</html>
+
+
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>TSV Großenkneten - Tabelle</title>
+  <script
+    type="text/javascript"
+    src="https://www.fussball.de/widgets.js">
   </script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      width: 100%;
+      height: 100%;
+    }
+    #container {
+      width: 100vw;
+      height: 100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      box-sizing: border-box;
+      padding: 20px;
+    }
+    .fussballde_widget {
+      width: 100% !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div
+      class="fussballde_widget"
+      data-id="dee66d0f-2c2b-4b49-bcff-a5689520e7c6"
+      data-type="table"
+      style="width: 100%"
+    ></div>
+  </div>
 </body>
 </html>
