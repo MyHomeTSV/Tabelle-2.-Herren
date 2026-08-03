@@ -62,14 +62,10 @@
       document.body.scrollTop = 0;
     }
 
-    var forceScrollCount = 0;
-    var forceScrollInterval = setInterval(function () {
-      forceTop();
-      forceScrollCount++;
-      if (forceScrollCount > 50) {
-        clearInterval(forceScrollInterval);
-      }
-    }, 200);
+    // Reagiert SOFORT auf jeden Scroll-Versuch, dauerhaft (nicht nur am Anfang)
+    window.addEventListener("scroll", forceTop, true);
+
+    forceTop();
 
     (function () {
       var step = 250;
@@ -78,8 +74,6 @@
       var current = 0;
 
       function tick() {
-        forceTop();
-
         var shifter = document.getElementById("shifter");
         var maxCrop = shifter.scrollHeight - window.innerHeight;
         if (maxCrop < 0) { maxCrop = 0; }
