@@ -52,7 +52,17 @@
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual";
     }
-    window.scrollTo(0, 0);
+
+    // Erzwingt in den ersten 10 Sekunden alle 200ms die Position oben,
+    // damit egal was Yodeck/das Widget im Hintergrund macht, nichts mehr auto-scrollt
+    var forceScrollCount = 0;
+    var forceScrollInterval = setInterval(function () {
+      window.scrollTo(0, 0);
+      forceScrollCount++;
+      if (forceScrollCount > 50) {
+        clearInterval(forceScrollInterval);
+      }
+    }, 200);
 
     (function () {
       var step = 250;
