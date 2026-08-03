@@ -39,22 +39,6 @@
     }
   </style>
 </head>
-
-<div id="debug" style="position:fixed; top:0; left:0; background:rgba(0,0,0,0.7); color:#0f0; font:14px monospace; padding:6px 10px; z-index:99999;"></div>
-
-  <script>
-    var debugEl = document.getElementById("debug");
-    function updateDebug() {
-      var shifter = document.getElementById("shifter");
-      debugEl.textContent =
-        "scrollY: " + window.scrollY +
-        " | innerHeight: " + window.innerHeight +
-        " | shifterHeight: " + shifter.scrollHeight +
-        " | crop-top: " + document.documentElement.style.getPropertyValue("--crop-top");
-    }
-    setInterval(updateDebug, 300);
-  </script>
-  
 <body>
   <div id="viewport">
     <div id="shifter">
