@@ -18,7 +18,8 @@
     }
     :root {
       --crop-top: 0px;
-      --zoom: 1.6; /* 1.0 = normale Größe, 1.3 = 30% größer usw. */
+      --static-crop-top: 100px;  /* EINSTELLBAR: fester Bereich (px) oben, der IMMER abgeschnitten bleibt, z. B. 100px */
+      --zoom: 1.6;              /* EINSTELLBAR: Größe der Tabelle. 1.0 = normal, 1.6 = 60% größer usw. */
     }
     #viewport {
       width: 100vw;
@@ -28,10 +29,9 @@
     }
     #shifter {
       position: absolute;
-      top: calc(-1 * var(--crop-top));
+      top: calc(-1 * (var(--static-crop-top) + var(--crop-top)));
       left: 0;
       width: 100%;
-      transition: top 1s ease-in-out;
     }
     .fussballde_widget {
       width: 100% !important;
@@ -43,14 +43,13 @@
   <div id="viewport">
     <div id="shifter">
       <div
-        class="fussballde_widget"
-        data-id="dee66d0f-2c2b-4b49-bcff-a5689520e7c6"
-        data-type="table"
+      class="fussballde_widget"
+      data-id="dee66d0f-2c2b-4b49-bcff-a5689520e7c6"
+      data-type="table"
         style="width: 100%"
       ></div>
     </div>
   </div>
-
 <script>
   if ("scrollRestoration" in history) {
     history.scrollRestoration = "manual";
@@ -64,27 +63,72 @@
   forceTop();
 
   (function () {
-    var initialDelay = 3000; // Wartezeit bis zum ERSTEN Scrollen (ms) → 3 Sekunden
-    var step = 350;          // Pixel pro Schritt
-    var stepPause = 4000;    // Wartezeit zwischen den weiteren Schritten (ms)
-    var topPause = 8000;     // Wartezeit oben, bevor der Zyklus neu startet (ms)
-    var current = 0;
+    // ==== EINSTELLBARE WERTE FÜR DEN SCROLL-TICKER ====
+    var initialDelay   = 4000;  // EINSTELLBAR: Wartezeit (ms) bis zum ERSTEN Scrollen nach dem Laden der Seite
+    var scrollDuration = 15000; // EINSTELLBAR: Dauer (ms) für den kompletten Weg von oben bis unten
+    var pauseAtBottom  = 2000;  // EINSTELLBAR: Wartezeit (ms) unten, bevor es zurück nach oben springt
+    var pauseAtTop     = 3000;  // EINSTELLBAR: Wartezeit (ms) oben, bevor der nächste Durchlauf startet
+    // ===================================================
 
-    function tick() {
-      var shifter = document.getElementById("shifter");
-      var maxCrop = shifter.scrollHeight - window.innerHeight;
-      if (maxCrop < 0) { maxCrop = 0; }
+    var generation = 0;
 
-      current += step;
-      if (current >= maxCrop) {
-        current = 0;
-      }
-
-      document.documentElement.style.setProperty("--crop-top", current + "px");
-      setTimeout(tick, current === 0 ? topPause : stepPause);
+    function setCrop(px) {
+      document.documentElement.style.setProperty("--crop-top", px + "px");
     }
 
-    setTimeout(tick, initialDelay);
+    function currentMaxCrop() {
+      var shifter = document.getElementById("shifter");
+      var staticCropTop = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue("--static-crop-top")
+      ) || 0;
+      var maxCrop = shifter.scrollHeight - window.innerHeight - staticCropTop;
+      return maxCrop < 0 ? 0 : maxCrop;
+    }
+
+    function animate(myGen, duration, onDone) {
+      var startTime = null;
+      function step(timestamp) {
+        if (myGen !== generation) { return; }
+        if (!startTime) startTime = timestamp;
+        var elapsed = timestamp - startTime;
+        var progress = Math.min(elapsed / duration, 1);
+        setCrop(currentMaxCrop() * progress);
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          onDone();
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    function cycle(myGen) {
+      if (myGen !== generation) { return; }
+      animate(myGen, scrollDuration, function () {
+        if (myGen !== generation) { return; }
+        setTimeout(function () {
+          if (myGen !== generation) { return; }
+          setCrop(0);
+          setTimeout(function () { cycle(myGen); }, pauseAtTop);
+        }, pauseAtBottom);
+      });
+    }
+
+    function startFresh() {
+      generation++;
+      var myGen = generation;
+      forceTop();
+      setCrop(0);
+      setTimeout(function () { cycle(myGen); }, initialDelay);
+    }
+
+    startFresh();
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "visible") {
+        startFresh();
+      }
+    });
   })();
 </script>
 </body>
